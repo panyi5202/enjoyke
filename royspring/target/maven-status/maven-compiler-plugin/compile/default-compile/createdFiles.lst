@@ -1,0 +1,14 @@
+com\roy\spring\framework\bean\BeanDefinition.class
+com\roy\spring\framework\context\support\BeanDefinitionReader.class
+com\roy\spring\demo\MyAction.class
+com\roy\spring\demo\MyService.class
+com\roy\spring\framework\bean\BeanWrapper.class
+com\roy\spring\framework\annotation\RoyAutowired.class
+com\roy\spring\framework\context\RoyApplicationContext.class
+com\roy\spring\framework\mvc\servlet\DispatchServlet.class
+com\roy\spring\demo\impl\MyServiceImpl.class
+com\roy\spring\framework\annotation\RoyController.class
+com\roy\spring\framework\core\FactoryBean.class
+com\roy\spring\framework\annotation\RoyService.class
+com\roy\spring\framework\bean\BeanPostProcessor.class
+com\roy\spring\framework\core\BeanFactory.class
