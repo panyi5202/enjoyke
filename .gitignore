@@ -1,4 +1,5 @@
 /target/
+/out/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
@@ -28,9 +29,4 @@
 /frontend/package-lock.json
 /build/*.jar
 *.class
-base/target/
-common/target/
-fx/target/
-nmedia/target/
-startup/logs/
-startup/target/
+
