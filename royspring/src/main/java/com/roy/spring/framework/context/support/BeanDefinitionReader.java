@@ -44,6 +44,7 @@ public class BeanDefinitionReader {
         if(registryBeanClasses.contains(className)){
             BeanDefinition beanDefinition = new BeanDefinition();
             beanDefinition.setBeanClassName(className);
+            // 这个FactoryBeanName是类名的首字母小写，比如：myAction
             beanDefinition.setFactoryBeanName(lowerFirstCase(className.substring(className.lastIndexOf(".")+1)));
             return beanDefinition;
         }

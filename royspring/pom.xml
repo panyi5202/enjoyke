@@ -23,22 +23,38 @@
 
     </dependencies>
 <build>
-    <plugins>
-        <plugin>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-maven-plugin</artifactId>
-            <version>9.2.1.v20140609</version>
-            <configuration>
-                <scanIntervalSeconds>10</scanIntervalSeconds>
-                <webApp>
-                    <contextPath>/roy</contextPath>
-                </webApp>
-                <httpConnector>
-                    <port>8888</port>
-                </httpConnector>
-            </configuration>
-        </plugin>
-    </plugins>
+    <!-- 主资源目录 -->
+    <resources>
+        <resource>
+            <!-- 设定主资源目录  -->
+            <directory>src/main/resources</directory>
+            <!-- maven default生命周期，process-resources阶段执行maven-resources-plugin插件的resources目标处理主资源目下的资源文件时，只处理如下配置中包含的资源类型
+            <includes>
+                <include>*.xml</include>
+            </includes>
+             -->
+
+            <!-- maven default生命周期，process-resources阶段执行maven-resources-plugin插件的resources目标处理主资源目下的资源文件时，不处理如下配置中包含的资源类型（剔除下如下配置中包含的资源类型）
+            <excludes>
+                <exclude>*.xml</exclude>
+            </excludes>
+            -->
+
+            <!-- maven default生命周期，process-resources阶段执行maven-resources-plugin插件的resources目标处理主资源目下的资源文件时，指定处理后的资源文件输出目录，默认是${build.outputDirectory}指定的目录
+            <targetPath>d:/</targetPath>
+               -->
+
+            <!-- maven default生命周期，process-resources阶段执行maven-resources-plugin插件的resources目标处理主资源目下的资源文件时，是否对主资源目录开启资源过滤 -->
+            <filtering>true</filtering>
+            <targetPath>${basedir}/src/main/webapp/WEB-INF/classes</targetPath>
+        </resource>
+        <resource>
+            <directory>src/main/java</directory>
+            <filtering>true</filtering>
+            <targetPath>${basedir}/src/main/webapp/WEB-INF/classes</targetPath>
+        </resource>
+    </resources>
+
 </build>
 
 

@@ -29,6 +29,7 @@ public class RoyApplicationContext implements BeanFactory {
 
     public RoyApplicationContext(String... configLocations) {
         this.configLocations  = configLocations;
+        // 初始化IOC容器
         refresh();
     }
 
@@ -37,7 +38,8 @@ public class RoyApplicationContext implements BeanFactory {
         this.reader = new BeanDefinitionReader(configLocations);
         // 加载：通过Reader获取指定目录下的所有class文件，封装到一个List<类全路径名>
         List<String> beanDefinitionClasses = reader.loadBeanDefinitions();
-        // 注册，把 类简称/类接口类型 与 BeanDefinition 的映射放入到Map中
+        // 注册，把 类简称/类接口类型 与 BeanDefinition 的映射放入到beanDefinitionMap中
+        // 用来支持通过指定名称注入和通过类型注入两种类型
         doRegistry(beanDefinitionClasses);
         // 处理依赖注入，通过调用getBean()实现
         doAutowire();
@@ -89,14 +91,16 @@ public class RoyApplicationContext implements BeanFactory {
                 Class<?> beanClass = Class.forName(className);
                 // 如果是一个接口，则不能实例化
                 if (beanClass.isInterface()){continue;}
-
+                // 创建类名（全路径）对应的BeanDefinition对象
                 BeanDefinition beanDefinition = reader.registerBean(className);
                 if (beanDefinition != null){
+                    // myAction:BeanDefition对象{beanClassName:com.roy.spring.demo.MyAction,factoryBeanName:myAction}
                     beanDefinitionMap.put(beanDefinition.getFactoryBeanName(),beanDefinition);
                 }
 
                 Class<?>[] interfaces = beanClass.getInterfaces();
                 for (Class<?> inf : interfaces) {
+                    // com.roy.spring.demo.MyService:BeanDefition对象{...}
                     beanDefinitionMap.put(inf.getName(),beanDefinition);
                 }
             }
@@ -113,12 +117,14 @@ public class RoyApplicationContext implements BeanFactory {
         try {
             // bean初始化前后发布通知事件
             BeanPostProcessor beanPostProcessor = new BeanPostProcessor();
+            // 创建真实的目标对象
             Object instance = initialBean(beanDefinition);
             if (instance == null) return null;
 
             // 在实例化之前调用一次
             beanPostProcessor.postProcessBeforeInitialization(instance,beanName);
 
+            // 把目标对象封装到BeanWrapper中
             BeanWrapper beanWrapper = new BeanWrapper(instance);
             beanWrappedMap.put(beanName,beanWrapper);
 
@@ -138,6 +144,7 @@ public class RoyApplicationContext implements BeanFactory {
 
         return null;
     }
+    // 实例化beanDefinition中定义的真实对象，并通过beanCacheMap保证注册式单例
     private Object initialBean(BeanDefinition beanDefinition) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         String className = beanDefinition.getBeanClassName();
         if (beanCacheMap.containsKey(className)){

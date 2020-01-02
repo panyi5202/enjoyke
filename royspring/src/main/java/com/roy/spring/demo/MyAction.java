@@ -8,6 +8,7 @@ import com.roy.spring.framework.mvc.RoyModeAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,11 @@ public class MyAction {
                                @RoyRequestParam("msg") String msg, @RoyRequestParam("id") Integer id) {
         String info = myService.info(msg);
         System.out.println(info);
+        try {
+            response.getWriter().write(info);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

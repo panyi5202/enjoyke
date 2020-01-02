@@ -5,7 +5,7 @@ package com.roy.spring.framework.bean;
  */
 public class BeanDefinition {
     private String beanClassName;
-    private String FactoryBeanName;
+    private String factoryBeanName;
     private Boolean lazyInit = false;
 
     public String getBeanClassName() {
@@ -17,11 +17,11 @@ public class BeanDefinition {
     }
 
     public String getFactoryBeanName() {
-        return FactoryBeanName;
+        return factoryBeanName;
     }
 
     public void setFactoryBeanName(String factoryBeanName) {
-        FactoryBeanName = factoryBeanName;
+        this.factoryBeanName = factoryBeanName;
     }
 
     public Boolean getLazyInit() {

@@ -69,8 +69,19 @@ public class DispatchServlet extends HttpServlet {
         }
     }
 
-    private void processDispatchResult(HttpServletResponse resp, RoyModeAndView mv) {
+    private void processDispatchResult(HttpServletResponse resp, RoyModeAndView mv) throws IOException {
         // 调用viewResolver的resolveView()方法
+        if (mv!=null && !this.viewResolvers.isEmpty()){
+            for (RoyViewResolver viewResolver : this.viewResolvers) {
+                if (viewResolver.getViewName().equals(mv.getViewName())){
+                    String out = viewResolver.resolverView(mv);
+                    if (out !=null){
+                        resp.getWriter().write(out);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private RoyHandlerAdapter getHandlerAdaper(RoyHandlerMapping handler) {
@@ -103,6 +114,7 @@ public class DispatchServlet extends HttpServlet {
                 servletConfig.getInitParameter("configLocation"));
         System.out.println("启动成功");
 
+        // 初始化SpringMVC
         initStrategies(applicationContext);
     }
 
@@ -142,7 +154,8 @@ public class DispatchServlet extends HttpServlet {
                 if (!method.isAnnotationPresent(RoyRequestMapping.class)) continue;
 
                 String mUrl = method.getAnnotation(RoyRequestMapping.class).value();
-                String regex = baseUrl+mUrl.replaceAll("/+","/");
+                String regex = baseUrl+mUrl.replaceAll("/+","/")
+                        .replaceAll("\\*",".*");
                 Pattern pattern = Pattern.compile(regex);
                 handlerMappings.add(new RoyHandlerMapping(pattern,controller,method));
                 System.out.println("mapping: "+pattern+"="+method);
