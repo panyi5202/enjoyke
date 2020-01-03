@@ -30,22 +30,14 @@ import java.util.regex.Pattern;
  * @author Roy
  */
 public class DispatchServlet extends HttpServlet {
-//    private Map<String, RoyHandlerMapping> handlerMappingMap = new HashMap<>();
+    //    private Map<String, RoyHandlerMapping> handlerMappingMap = new HashMap<>();
     private List<RoyHandlerMapping> handlerMappings = new ArrayList<>();
-    private Map<RoyHandlerMapping,RoyHandlerAdapter> handlerAdapters = new HashMap<>();
+    private Map<RoyHandlerMapping, RoyHandlerAdapter> handlerAdapters = new HashMap<>();
     private List<RoyViewResolver> viewResolvers = new ArrayList<>();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doDispatch(req,resp);
-        /*
-        try {
-            RoyModeAndView mv = (RoyModeAndView) handler.getMethod().invoke(handler.getController(),null);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }*/
+        doDispatch(req, resp);
     }
 
     @Override
@@ -57,8 +49,8 @@ public class DispatchServlet extends HttpServlet {
         try {
             RoyHandlerMapping handler = getHandler(req);
             RoyHandlerAdapter ha = getHandlerAdaper(handler);
-            RoyModeAndView mv = ha.handle(req,resp,handler);
-            processDispatchResult(resp,mv);
+            RoyModeAndView mv = ha.handle(req, resp, handler);
+            processDispatchResult(resp, mv);
         } catch (Exception e) {
             e.printStackTrace();
             try {
@@ -71,11 +63,11 @@ public class DispatchServlet extends HttpServlet {
 
     private void processDispatchResult(HttpServletResponse resp, RoyModeAndView mv) throws IOException {
         // 调用viewResolver的resolveView()方法
-        if (mv!=null && !this.viewResolvers.isEmpty()){
+        if (mv != null && !this.viewResolvers.isEmpty()) {
             for (RoyViewResolver viewResolver : this.viewResolvers) {
-                if (viewResolver.getViewName().equals(mv.getViewName())){
+                if (viewResolver.getViewName().equals(mv.getViewName())) {
                     String out = viewResolver.resolverView(mv);
-                    if (out !=null){
+                    if (out != null) {
                         resp.getWriter().write(out);
                         break;
                     }
@@ -85,7 +77,7 @@ public class DispatchServlet extends HttpServlet {
     }
 
     private RoyHandlerAdapter getHandlerAdaper(RoyHandlerMapping handler) {
-        if (!handlerAdapters.isEmpty()){
+        if (!handlerAdapters.isEmpty()) {
             return this.handlerAdapters.get(handler);
         }
         return null;
@@ -95,11 +87,11 @@ public class DispatchServlet extends HttpServlet {
     private RoyHandlerMapping getHandler(HttpServletRequest req) {
         String url = req.getRequestURI();
         String contextPath = req.getContextPath();
-        url = url.replace(contextPath,"").replaceAll("/+","/");
+        url = url.replace(contextPath, "").replaceAll("/+", "/");
 
         for (RoyHandlerMapping handlerMapping : handlerMappings) {
             Matcher matcher = handlerMapping.getUrl().matcher(url);
-            if (matcher.matches()){
+            if (matcher.matches()) {
                 return handlerMapping;
             }
         }
@@ -142,9 +134,8 @@ public class DispatchServlet extends HttpServlet {
 
             if (!clazz.isAnnotationPresent(RoyController.class)) continue;
 
-            String baseUrl=null;
-
-            if (clazz.isAnnotationPresent(RoyRequestMapping.class)){
+            String baseUrl = null;
+            if (clazz.isAnnotationPresent(RoyRequestMapping.class)) {
                 baseUrl = clazz.getAnnotation(RoyRequestMapping.class).value();
             }
             // 扫描所有的方法
@@ -154,11 +145,12 @@ public class DispatchServlet extends HttpServlet {
                 if (!method.isAnnotationPresent(RoyRequestMapping.class)) continue;
 
                 String mUrl = method.getAnnotation(RoyRequestMapping.class).value();
-                String regex = baseUrl+mUrl.replaceAll("/+","/")
-                        .replaceAll("\\*",".*");
+                // 处理url是正则表达式的情况
+                String regex = baseUrl + mUrl.replaceAll("/+", "/")
+                        .replaceAll("\\*", ".*");
                 Pattern pattern = Pattern.compile(regex);
-                handlerMappings.add(new RoyHandlerMapping(pattern,controller,method));
-                System.out.println("mapping: "+pattern+"="+method);
+                handlerMappings.add(new RoyHandlerMapping(pattern, controller, method));
+                System.out.println("mapping: " + pattern + "=" + method);
             }
         }
     }
@@ -166,14 +158,14 @@ public class DispatchServlet extends HttpServlet {
     private void initHandlerAdapters(RoyApplicationContext context) {
         for (RoyHandlerMapping handlerMapping : this.handlerMappings) {
             // 每个方法都有一个参数列表
-            Map<String,Integer> paramMapping = new HashMap<>();
-
+            Map<String, Integer> paramMapping = new HashMap<>();
+            // 处理带@RoyRequestParam标注的参数
             Annotation[][] annotations = handlerMapping.getMethod().getParameterAnnotations();
             for (int i = 0; i < annotations.length; i++) {
                 for (Annotation anno : annotations[i]) {
-                    if (anno instanceof RoyRequestParam){
+                    if (anno instanceof RoyRequestParam) {
                         String paramName = ((RoyRequestParam) anno).value().trim();
-                        paramMapping.put(paramName,i);
+                        paramMapping.put(paramName, i);
                     }
                 }
             }
@@ -181,12 +173,12 @@ public class DispatchServlet extends HttpServlet {
             Class<?>[] parameterTypes = handlerMapping.getMethod().getParameterTypes();
             for (int i = 0; i < parameterTypes.length; i++) {
                 if (parameterTypes[i].equals(HttpServletRequest.class) ||
-                parameterTypes[i].equals(HttpServletResponse.class)){
-                    paramMapping.put(parameterTypes[i].getName(),i);
+                        parameterTypes[i].equals(HttpServletResponse.class)) {
+                    paramMapping.put(parameterTypes[i].getName(), i);
                 }
             }
 
-            this.handlerAdapters.put(handlerMapping,new RoyHandlerAdapter(handlerMapping,paramMapping));
+            this.handlerAdapters.put(handlerMapping, new RoyHandlerAdapter(handlerMapping, paramMapping));
         }
     }
 
@@ -194,19 +186,29 @@ public class DispatchServlet extends HttpServlet {
         String tempateRoot = context.getConifg().getProperty("tempateRoot");
         String fullPath = this.getClass().getClassLoader().getResource(tempateRoot).getFile();
 
-        File rootDir = new File(fullPath);
-        for (File file : rootDir.listFiles()) {
-            viewResolvers.add(new RoyViewResolver(file.getName(),file));
+        File templateRootDir = new File(fullPath);
+        for (File templateFile : templateRootDir.listFiles()) {
+            viewResolvers.add(new RoyViewResolver(templateFile.getName(), templateFile));
         }
     }
 
 
-
     /*=======================================================================================*/
-    private void initHandlerExceptionResolvers(RoyApplicationContext context) {}
-    private void initRequestToViewNameTranslator(RoyApplicationContext context) {}
-    private void initFlashMapManager(RoyApplicationContext context) {}
-    private void initThemeResolver(RoyApplicationContext context) {}
-    private void initLocaleResolver(RoyApplicationContext context) {}
-    private void initMultipartResolver(RoyApplicationContext context) {}
+    private void initHandlerExceptionResolvers(RoyApplicationContext context) {
+    }
+
+    private void initRequestToViewNameTranslator(RoyApplicationContext context) {
+    }
+
+    private void initFlashMapManager(RoyApplicationContext context) {
+    }
+
+    private void initThemeResolver(RoyApplicationContext context) {
+    }
+
+    private void initLocaleResolver(RoyApplicationContext context) {
+    }
+
+    private void initMultipartResolver(RoyApplicationContext context) {
+    }
 }

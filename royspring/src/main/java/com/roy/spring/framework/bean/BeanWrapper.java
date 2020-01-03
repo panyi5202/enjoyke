@@ -6,8 +6,8 @@ import com.roy.spring.framework.core.FactoryBean;
  * @author Roy
  */
 public class BeanWrapper extends FactoryBean {
-    private Object warpperInstance;
-    private Object originalInstance;
+    private Object warpperInstance; // 原始类的代理对象
+    private Object originalInstance; // 原始对象
 
     private BeanPostProcessor beanPostProcessor;
 

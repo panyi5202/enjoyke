@@ -26,15 +26,16 @@ public class RoyViewResolver {
         StringBuilder sb = new StringBuilder();
 
         String line = null;
-        while (null != (line = ra.readLine())){
+        while (null != (line = ra.readLine())) {
             Matcher matcher = matcher(line);
-            while (matcher.find()){
+            while (matcher.find()) {
                 for (int i = 1; i <= matcher.groupCount(); i++) {
                     // 把模板中的参数名称取出来
                     String paramName = matcher.group(i);
                     Object paramValue = mv.getModel().get(paramName);
-                    if (paramValue != null){
-                        line = line.replaceAll("\\$\\{"+paramName+"\\}",paramValue.toString());
+                    if (paramValue != null) {
+                        // 把参数替换成真正的值
+                        line = line.replaceAll("\\$\\{" + paramName + "\\}", paramValue.toString());
                     }
                 }
             }
@@ -43,7 +44,7 @@ public class RoyViewResolver {
         return sb.toString();
     }
 
-    private Matcher matcher(String str){
+    private Matcher matcher(String str) {
         Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}", Pattern.CASE_INSENSITIVE);
         return pattern.matcher(str);
     }
@@ -68,7 +69,7 @@ public class RoyViewResolver {
         Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}", Pattern.CASE_INSENSITIVE);
         String line = "aaddd${dd}32332";
         Matcher matcher = pattern.matcher(line);
-        if (matcher.find()){
+        if (matcher.find()) {
             System.out.println(matcher.groupCount());
         }
     }
